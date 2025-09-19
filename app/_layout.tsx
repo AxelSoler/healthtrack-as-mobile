@@ -1,24 +1,66 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import "react-native-reanimated";
+import { useState, useEffect } from "react";
+import { Slot, useRouter, useSegments } from "expo-router";
+import { Session } from "@supabase/supabase-js";
+import { supabase } from "@/utils/supabase";
+import { View } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: "(tabs)",
 };
-
 export default function RootLayout() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const segments = useSegments();
   const colorScheme = useColorScheme();
 
+  useEffect(() => {
+    // 1. Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    // 2. Listen for changes to auth state
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+
+    // Redirects depending on whether the user is signed in
+    if (session && inAuthGroup) {
+      // User is signed in and in the auth group, redirect to app
+      router.replace("/dashboard");
+    } else if (!session && !inAuthGroup) {
+      // User is not signed in and not in the auth group, redirect to auth
+      router.replace("/login");
+    }
+  }, [session, loading, segments]);
+
+  if (loading) {
+    return <View />;
+  }
+
+  // Slot renders the active route
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <Slot />
     </ThemeProvider>
   );
 }
