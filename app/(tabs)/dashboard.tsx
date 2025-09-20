@@ -139,11 +139,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   motivation: {
-    fontSize: 16,
+    fontSize: 24,
     textAlign: "center",
     fontWeight: "600",
-    marginBottom: 8,
-    color: "#1a73e8",
+    marginBottom: 16,
+    color: "#da2978",
   },
   latestWeight: {
     fontSize: 14,
