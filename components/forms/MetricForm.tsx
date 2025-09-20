@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 // import { useNotification } from "@/contexts/NotificationContext";
 import { supabase } from "@/utils/supabase";
+import PrimaryButton from "../buttons/PrimaryButton";
 
 async function addMetricByType(
   type: "weight" | "blood_pressure" | "sleep_hours",
@@ -74,7 +75,7 @@ function MetricFormSection({
         keyboardType={inputType === "number" ? "numeric" : "default"}
         style={styles.input}
       />
-      <Button title="Save" onPress={handleSubmit} />
+      <PrimaryButton title="Save" onPress={handleSubmit} />
     </View>
   );
 }
@@ -119,15 +120,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "500",
     marginBottom: 6,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 8,
+    padding: 12,
     borderRadius: 6,
-    marginBottom: 8,
+    marginVertical: 14,
   },
 });

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, StyleSheet, View, Text, TextInput, Button } from 'react-native';
 import { supabase } from '@/utils/supabase';
+import PrimaryButton from '@/components/buttons/PrimaryButton';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -44,7 +45,7 @@ export default function LoginScreen() {
         secureTextEntry
       />
 
-      <Button
+      <PrimaryButton
         title={loading ? 'Loging in...' : 'Login'}
         onPress={handleLogin}
         disabled={loading}
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     padding: 10,
     borderRadius: 5,
-    marginBottom: 15,
+    marginBottom: 20,
     fontSize: 16,
   },
 });

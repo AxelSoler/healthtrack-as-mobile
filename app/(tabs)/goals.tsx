@@ -13,6 +13,7 @@ import { MetricChart } from "@/components/charts/MetricChart";
 import { MetricForm } from "@/components/forms/MetricForm";
 import GoalsCard from "@/components/cards/GoalsCard";
 import { useUser } from "@/context/UserContext";
+import PrimaryButton from "@/components/buttons/PrimaryButton";
 
 export default function GoalsScreen() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -70,14 +71,10 @@ export default function GoalsScreen() {
         <View style={styles.inner}>
           <View style={styles.headerRow}>
             <Text style={styles.title}>Your Goals</Text>
-            <TouchableOpacity
-              style={styles.goalButton}
+            <PrimaryButton
+              title={weightGoal > 0 ? "Update Goal" : "Set a goal!"}
               onPress={() => setIsModalOpen(true)}
-            >
-              <Text style={styles.goalButtonText}>
-                {weightGoal > 0 ? "Update Goal" : "Set a goal!"}
-              </Text>
-            </TouchableOpacity>
+            />
           </View>
 
           <GoalsCard metrics={metrics} profile={profile} />
@@ -106,12 +103,10 @@ export default function GoalsScreen() {
               placeholder="Enter your goal weight"
               style={styles.input}
             />
-            <TouchableOpacity
-              style={styles.submitButton}
+            <PrimaryButton
+              title="Save Goal"
               onPress={handleSetGoal}
-            >
-              <Text style={styles.submitButtonText}>Save Goal</Text>
-            </TouchableOpacity>
+            />
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setIsModalOpen(false)}
@@ -173,13 +168,6 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 16,
   },
-  submitButton: {
-    backgroundColor: "#1a73e8",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  submitButtonText: { color: "#fff", textAlign: "center", fontWeight: "bold" },
-  cancelButton: { padding: 10 },
+  cancelButton: { padding: 10, marginTop: 10, backgroundColor: "#eee", borderRadius: 10 },
   cancelButtonText: { textAlign: "center", color: "#555" },
 });

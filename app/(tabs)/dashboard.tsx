@@ -9,6 +9,7 @@ import {
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";
 import { useUser } from "@/context/UserContext";
+import PrimaryButton from "@/components/buttons/PrimaryButton";
 
 const motivationalMessages = [
   "Every step counts! Keep going on your wellness journey.",
@@ -83,12 +84,10 @@ export default function DashboardScreen() {
             </Text>
           )}
 
-          <TouchableOpacity
-            style={styles.button}
+          <PrimaryButton
+            title="Define Your Goals"
             onPress={() => router.push("/goals")}
-          >
-            <Text style={styles.buttonText}>Define Your Goals</Text>
-          </TouchableOpacity>
+          />
         </View>
 
         <View style={styles.metricsSection}>
@@ -151,17 +150,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#555",
     marginBottom: 12,
-  },
-  button: {
-    backgroundColor: "#1a73e8",
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
   },
   metricsSection: {
     marginTop: 12,
