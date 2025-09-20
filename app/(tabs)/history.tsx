@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { supabase } from "@/utils/supabase";
+import { useUser } from "@/context/UserContext";
 
 interface HistoryItem {
   created_at: string;
@@ -10,12 +11,17 @@ interface HistoryItem {
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchHistory = async () => {
+      if (!user) {
+        return;
+      }
       const { data, error } = await supabase
         .from("history_logs")
         .select("created_at, description")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (!error && data) setHistory(data);

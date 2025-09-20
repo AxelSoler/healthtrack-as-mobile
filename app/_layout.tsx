@@ -10,6 +10,7 @@ import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabase";
 import { View } from "react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { UserProvider } from "@/context/UserContext";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -59,8 +60,10 @@ export default function RootLayout() {
 
   // Slot renders the active route
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Slot />
-    </ThemeProvider>
+    <UserProvider user={session?.user ?? null}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Slot />
+      </ThemeProvider>
+    </UserProvider>
   );
 }

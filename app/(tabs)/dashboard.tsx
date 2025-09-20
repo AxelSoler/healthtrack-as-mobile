@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";
+import { useUser } from "@/context/UserContext";
 
 const motivationalMessages = [
   "Every step counts! Keep going on your wellness journey.",
@@ -21,7 +22,7 @@ export default function DashboardScreen() {
   const [randomMessage, setRandomMessage] = useState("");
   const [metrics, setMetrics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const { user } = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -33,13 +34,8 @@ export default function DashboardScreen() {
   }, []);
 
   useEffect(() => {
-    const getUserAndMetrics = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+    const getMetrics = async () => {
       if (!user) {
-        router.replace("/login");
         return;
       }
 
@@ -56,8 +52,8 @@ export default function DashboardScreen() {
       setLoading(false);
     };
 
-    getUserAndMetrics();
-  }, []);
+    getMetrics();
+  }, [user]);
 
   const weights = metrics
     ?.map((metric) => metric.weight)
@@ -72,10 +68,8 @@ export default function DashboardScreen() {
     );
   }
 
-
   return (
     <View style={styles.container}>
-
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

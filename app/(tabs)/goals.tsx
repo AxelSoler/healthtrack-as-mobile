@@ -9,10 +9,10 @@ import {
   Modal,
 } from "react-native";
 import { supabase } from "@/utils/supabase";
-import { useRouter } from "expo-router";
 import { MetricChart } from "@/components/charts/MetricChart";
 import { MetricForm } from "@/components/forms/MetricForm";
 import GoalsCard from "@/components/cards/GoalsCard";
+import { useUser } from "@/context/UserContext";
 
 export default function GoalsScreen() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -20,17 +20,11 @@ export default function GoalsScreen() {
   const [profile, setProfile] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newGoal, setNewGoal] = useState("");
-
-  const router = useRouter();
+  const { user } = useUser();
 
   useEffect(() => {
     const getUserAndData = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) {
-        router.replace("/login");
         return;
       }
 
@@ -72,7 +66,6 @@ export default function GoalsScreen() {
 
   return (
     <View style={styles.container}>
-
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.inner}>
           <View style={styles.headerRow}>
@@ -87,7 +80,7 @@ export default function GoalsScreen() {
             </TouchableOpacity>
           </View>
 
-          {profile && <GoalsCard metrics={metrics} profile={profile} />}
+          <GoalsCard metrics={metrics} profile={profile} />
 
           <View style={styles.chartContainer}>
             <MetricChart metrics={metrics} />
@@ -113,7 +106,10 @@ export default function GoalsScreen() {
               placeholder="Enter your goal weight"
               style={styles.input}
             />
-            <TouchableOpacity style={styles.submitButton} onPress={handleSetGoal}>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSetGoal}
+            >
               <Text style={styles.submitButtonText}>Save Goal</Text>
             </TouchableOpacity>
             <TouchableOpacity
