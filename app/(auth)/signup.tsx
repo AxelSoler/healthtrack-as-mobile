@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Alert, StyleSheet, View, Text, TextInput, Button } from 'react-native';
+import { Alert, StyleSheet, View, Text, TextInput } from 'react-native';
 import { supabase } from '@/utils/supabase';
 import PrimaryButton from '@/components/buttons/PrimaryButton';
+import { Link } from 'expo-router';
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
@@ -55,6 +56,9 @@ export default function SignUpScreen() {
         onPress={handleSignUp}
         disabled={loading}
       />
+      <Link href="/login" style={styles.link}>
+        Already have an account? Log in
+      </Link>
     </View>
   );
 }
@@ -78,5 +82,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 20,
     fontSize: 16,
+  },
+  link: {
+    marginTop: 10,
+    textAlign: 'center',
+    color: 'blue',
   },
 });

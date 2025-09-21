@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { Alert, StyleSheet, View, Text, TextInput, Button } from 'react-native';
-import { supabase } from '@/utils/supabase';
-import PrimaryButton from '@/components/buttons/PrimaryButton';
+import { useState } from "react";
+import { Alert, StyleSheet, View, Text, TextInput } from "react-native";
+import { supabase } from "@/utils/supabase";
+import PrimaryButton from "@/components/buttons/PrimaryButton";
+import { Link } from "expo-router";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      Alert.alert("Error", "Please enter both email and password");
       return;
     }
     setLoading(true);
@@ -20,7 +21,7 @@ export default function LoginScreen() {
     });
 
     if (error) {
-      Alert.alert('Login error: ', error.message);
+      Alert.alert("Login error: ", error.message);
     }
     setLoading(false);
   }
@@ -46,10 +47,13 @@ export default function LoginScreen() {
       />
 
       <PrimaryButton
-        title={loading ? 'Loging in...' : 'Login'}
+        title={loading ? "Loging in..." : "Login"}
         onPress={handleLogin}
         disabled={loading}
       />
+      <Link href="/signup" style={styles.link}>
+        Don&apos;t have an account? Sign up
+      </Link>
     </View>
   );
 }
@@ -57,21 +61,26 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 20,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     padding: 10,
     borderRadius: 5,
     marginBottom: 20,
     fontSize: 16,
+  },
+  link: {
+    marginTop: 10,
+    textAlign: "center",
+    color: "blue",
   },
 });

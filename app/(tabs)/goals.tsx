@@ -48,7 +48,7 @@ export default function GoalsScreen() {
     };
 
     getUserAndData();
-  }, []);
+  }, [user]);
 
   const handleSetGoal = async () => {
     const goal = parseFloat(newGoal);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput, StyleSheet } from "react-native";
 // import { useNotification } from "@/contexts/NotificationContext";
 import { supabase } from "@/utils/supabase";
 import PrimaryButton from "../buttons/PrimaryButton";

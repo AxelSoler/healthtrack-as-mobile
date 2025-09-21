@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
 } from "react-native";
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";

@@ -52,7 +52,7 @@ export default function RootLayout() {
       // User is not signed in and not in the auth group, redirect to auth
       router.replace("/login");
     }
-  }, [session, loading, segments]);
+  }, [session, loading, segments, router]);
 
   if (loading) {
     return <View />;

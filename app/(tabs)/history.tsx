@@ -29,7 +29,7 @@ export default function HistoryPage() {
     };
 
     fetchHistory();
-  }, []);
+  }, [user]);
 
   const renderItem = ({ item }: { item: HistoryItem }) => (
     <View style={styles.item}>
