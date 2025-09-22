@@ -1,17 +1,22 @@
 import { useState } from "react";
-import { Alert, StyleSheet, View, Text, TextInput } from "react-native";
+import { StyleSheet, View, Text, TextInput } from "react-native";
 import { supabase } from "@/utils/supabase";
 import PrimaryButton from "@/components/buttons/PrimaryButton";
 import { Link } from "expo-router";
+import { useNotification } from "@/context/NotificationContext";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const notification = useNotification();
 
   async function handleLogin() {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password");
+      notification.showNotification(
+        "Please enter both email and password",
+        "error"
+      );
       return;
     }
     setLoading(true);
@@ -21,7 +26,7 @@ export default function LoginScreen() {
     });
 
     if (error) {
-      Alert.alert("Login error: ", error.message);
+      notification.showNotification(`Login error: ${error.message}`, "error");
     }
     setLoading(false);
   }

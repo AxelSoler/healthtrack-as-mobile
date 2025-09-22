@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,52 +14,59 @@ import { MetricForm } from "@/components/forms/MetricForm";
 import GoalsCard from "@/components/cards/GoalsCard";
 import { useUser } from "@/context/UserContext";
 import PrimaryButton from "@/components/buttons/PrimaryButton";
+import { useNotification } from "@/context/NotificationContext";
 
 export default function GoalsScreen() {
-  const [userId, setUserId] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newGoal, setNewGoal] = useState("");
   const { user } = useUser();
+  const notification = useNotification();
+
+  const fetchUserData = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+
+    const { data: metricsData } = await supabase
+      .from("metrics")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("weight_goal")
+      .eq("id", user.id)
+      .single();
+
+    if (metricsData) setMetrics(metricsData);
+    if (profileData) setProfile(profileData);
+  }, [user]);
 
   useEffect(() => {
-    const getUserAndData = async () => {
-      if (!user) {
-        return;
-      }
-
-      setUserId(user.id);
-
-      const { data: metricsData } = await supabase
-        .from("metrics")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("weight_goal")
-        .eq("id", user.id)
-        .single();
-
-      if (metricsData) setMetrics(metricsData);
-      if (profileData) setProfile(profileData);
-    };
-
-    getUserAndData();
-  }, [user]);
+    fetchUserData();
+  }, [fetchUserData]);
 
   const handleSetGoal = async () => {
     const goal = parseFloat(newGoal);
-    if (!isNaN(goal) && userId) {
-      await supabase
+    if (!isNaN(goal) && user?.id) {
+      const { error } = await supabase
         .from("profiles")
         .update({ weight_goal: goal })
-        .eq("id", userId);
+        .eq("id", user.id);
 
-      setProfile({ ...profile, weight_goal: goal });
-      setIsModalOpen(false);
+      if (error) {
+        notification.showNotification(
+          `Error setting goal: ${error.message}`,
+          "error"
+        );
+      } else {
+        setProfile({ ...profile, weight_goal: goal });
+        setIsModalOpen(false);
+        notification.showNotification("Goal updated successfully!", "success");
+      }
     }
   };
 
@@ -83,7 +90,7 @@ export default function GoalsScreen() {
             <MetricChart metrics={metrics} />
           </View>
 
-          <MetricForm />
+          <MetricForm onSuccess={fetchUserData} />
         </View>
       </ScrollView>
 
@@ -103,10 +110,7 @@ export default function GoalsScreen() {
               placeholder="Enter your goal weight"
               style={styles.input}
             />
-            <PrimaryButton
-              title="Save Goal"
-              onPress={handleSetGoal}
-            />
+            <PrimaryButton title="Save Goal" onPress={handleSetGoal} />
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setIsModalOpen(false)}
@@ -168,6 +172,11 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 16,
   },
-  cancelButton: { padding: 10, marginTop: 10, backgroundColor: "#eee", borderRadius: 10 },
+  cancelButton: {
+    padding: 10,
+    marginTop: 10,
+    backgroundColor: "#eee",
+    borderRadius: 10,
+  },
   cancelButtonText: { textAlign: "center", color: "#555" },
 });

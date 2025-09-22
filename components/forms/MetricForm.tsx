@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
-// import { useNotification } from "@/contexts/NotificationContext";
 import { supabase } from "@/utils/supabase";
 import PrimaryButton from "../buttons/PrimaryButton";
+import { useNotification } from "@/context/NotificationContext";
 
 async function addMetricByType(
   type: "weight" | "blood_pressure" | "sleep_hours",
@@ -30,38 +30,37 @@ async function addMetricByType(
   return { success: true };
 }
 
-// 🔹 Subcomponente para cada sección
 function MetricFormSection({
   action,
   label,
   inputType,
-  // onSuccess,
+  onSuccess,
 }: {
   action: (value: string | number) => Promise<{ error?: string; success?: boolean }>;
   label: string;
   inputType: "text" | "number";
-  // onSuccess?: () => void;
+  onSuccess?: () => void;
 }) {
   const [value, setValue] = useState("");
-  // const { showNotification } = useNotification();
+  const { showNotification } = useNotification();
 
   const handleSubmit = async () => {
     const parsedValue =
       inputType === "number" ? Number(value) : value.trim();
 
     if (!parsedValue) {
-      // showNotification("Please enter a valid value", "error");
+      showNotification("Please enter a valid value", "error");
       return;
     }
 
     const res = await action(parsedValue);
 
     if (res.error) {
-      // showNotification(res.error, "error");
+      showNotification(res.error, "error");
     } else if (res.success) {
-      // showNotification("Metric saved successfully!", "success");
+      showNotification("Metric saved successfully!", "success");
       setValue("");
-      // onSuccess?.();
+      onSuccess?.();
     }
   };
 
@@ -80,7 +79,7 @@ function MetricFormSection({
   );
 }
 
-export function MetricForm() {
+export function MetricForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add latest metrics</Text>
@@ -88,19 +87,19 @@ export function MetricForm() {
         action={(value) => addMetricByType("weight", value)}
         label="Weight (lbs)"
         inputType="number"
-        // onSuccess={onSuccess}
+        onSuccess={onSuccess}
       />
       <MetricFormSection
         action={(value) => addMetricByType("blood_pressure", value)}
         label="Blood Pressure (e.g., 120/80)"
         inputType="text"
-        // onSuccess={onSuccess}
+        onSuccess={onSuccess}
       />
       <MetricFormSection
         action={(value) => addMetricByType("sleep_hours", value)}
         label="Sleep (hours)"
         inputType="number"
-        // onSuccess={onSuccess}
+        onSuccess={onSuccess}
       />
     </View>
   );

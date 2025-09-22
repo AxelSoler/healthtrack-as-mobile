@@ -1,17 +1,22 @@
-import { useState } from 'react';
-import { Alert, StyleSheet, View, Text, TextInput } from 'react-native';
-import { supabase } from '@/utils/supabase';
-import PrimaryButton from '@/components/buttons/PrimaryButton';
-import { Link } from 'expo-router';
+import { useState } from "react";
+import { StyleSheet, View, Text, TextInput } from "react-native";
+import { supabase } from "@/utils/supabase";
+import PrimaryButton from "@/components/buttons/PrimaryButton";
+import { Link } from "expo-router";
+import { useNotification } from "@/context/NotificationContext";
 
 export default function SignUpScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const notification = useNotification();
 
   async function handleSignUp() {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      notification.showNotification(
+        "Please enter both email and password",
+        "error"
+      );
       return;
     }
     setLoading(true);
@@ -21,11 +26,11 @@ export default function SignUpScreen() {
     });
 
     if (error) {
-      Alert.alert('Error: ', error.message);
+      notification.showNotification(`Sign up error: ${error.message}`, "error");
     } else if (!data.session) {
-      Alert.alert(
-        'Account created!',
-        'Please check your email to confirm your account.'
+      notification.showNotification(
+        "Sign up successful! Please check your email to confirm your account.",
+        "success"
       );
     }
     setLoading(false);
@@ -52,7 +57,7 @@ export default function SignUpScreen() {
       />
 
       <PrimaryButton
-        title={loading ? 'Creating account...' : 'Create Account'}
+        title={loading ? "Creating account..." : "Create Account"}
         onPress={handleSignUp}
         disabled={loading}
       />
@@ -66,18 +71,18 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 20,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     padding: 10,
     borderRadius: 5,
     marginBottom: 20,
@@ -85,7 +90,7 @@ const styles = StyleSheet.create({
   },
   link: {
     marginTop: 10,
-    textAlign: 'center',
-    color: 'blue',
+    textAlign: "center",
+    color: "blue",
   },
 });

@@ -11,6 +11,8 @@ import { supabase } from "@/utils/supabase";
 import { View } from "react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { UserProvider } from "@/context/UserContext";
+import { NotificationProvider } from "@/context/NotificationContext";
+import Notification from "@/components/notifications/Notification";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -60,10 +62,13 @@ export default function RootLayout() {
 
   // Slot renders the active route
   return (
-    <UserProvider user={session?.user ?? null}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Slot />
-      </ThemeProvider>
-    </UserProvider>
+    <NotificationProvider>
+      <UserProvider user={session?.user ?? null}>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <Slot />
+          <Notification />
+        </ThemeProvider>
+      </UserProvider>
+    </NotificationProvider>
   );
 }
