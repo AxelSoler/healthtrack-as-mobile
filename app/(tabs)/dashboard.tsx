@@ -9,6 +9,7 @@ import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";
 import { useUser } from "@/context/UserContext";
 import PrimaryButton from "@/components/buttons/PrimaryButton";
+import Loading from "@/components/Loading";
 
 const motivationalMessages = [
   "Every step counts! Keep going on your wellness journey.",
@@ -61,11 +62,7 @@ export default function DashboardScreen() {
   const latestWeight = weights && weights.length > 0 ? weights[0] : null;
 
   if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
-    );
+    return <Loading />;
   }
 
   return (

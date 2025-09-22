@@ -15,11 +15,13 @@ import GoalsCard from "@/components/cards/GoalsCard";
 import { useUser } from "@/context/UserContext";
 import PrimaryButton from "@/components/buttons/PrimaryButton";
 import { useNotification } from "@/context/NotificationContext";
+import Loading from "@/components/Loading";
 
 export default function GoalsScreen() {
   const [metrics, setMetrics] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newGoal, setNewGoal] = useState("");
   const { user } = useUser();
   const notification = useNotification();
@@ -28,7 +30,8 @@ export default function GoalsScreen() {
     if (!user) {
       return;
     }
-
+    
+    setLoading(true);
     const { data: metricsData } = await supabase
       .from("metrics")
       .select("*")
@@ -43,6 +46,7 @@ export default function GoalsScreen() {
 
     if (metricsData) setMetrics(metricsData);
     if (profileData) setProfile(profileData);
+    setLoading(false);
   }, [user]);
 
   useEffect(() => {
@@ -71,6 +75,10 @@ export default function GoalsScreen() {
   };
 
   const weightGoal = profile?.weight_goal || 0;
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <View style={styles.container}>

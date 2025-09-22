@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { supabase } from "@/utils/supabase";
 import { useUser } from "@/context/UserContext";
+import Loading from "@/components/Loading";
 
 interface HistoryItem {
   created_at: string;
@@ -10,7 +11,7 @@ interface HistoryItem {
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { user } = useUser();
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export default function HistoryPage() {
       if (!user) {
         return;
       }
+      setLoading(true);
       const { data, error } = await supabase
         .from("history_logs")
         .select("created_at, description")
@@ -30,6 +32,10 @@ export default function HistoryPage() {
 
     fetchHistory();
   }, [user]);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   const renderItem = ({ item }: { item: HistoryItem }) => (
     <View style={styles.item}>
