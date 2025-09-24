@@ -1,15 +1,12 @@
 import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";
 import { useUser } from "@/context/UserContext";
 import PrimaryButton from "@/components/buttons/PrimaryButton";
 import Loading from "@/components/Loading";
+import { Metric } from "@/types";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 
 const motivationalMessages = [
   "Every step counts! Keep going on your wellness journey.",
@@ -21,7 +18,13 @@ const motivationalMessages = [
 
 export default function DashboardScreen() {
   const [randomMessage, setRandomMessage] = useState("");
-  const [metrics, setMetrics] = useState<any[]>([]);
+  const [latestWeight, setLatestWeight] = useState<Metric | null>(null);
+  const [latestSleepHours, setLatestSleepHours] = useState<Metric | null>(
+    null
+  );
+  const [latestBloodPressure, setLatestBloodPressure] = useState<
+    Metric | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const { user } = useUser();
   const router = useRouter();
@@ -35,31 +38,51 @@ export default function DashboardScreen() {
   }, []);
 
   useEffect(() => {
-    const getMetrics = async () => {
+    const getLatestMetrics = async () => {
       if (!user) {
+        setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase
-        .from("metrics")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(3);
+      try {
+        const { data: weightData } = await supabase
+          .from("metrics")
+          .select("*")
+          .eq("user_id", user.id)
+          .not("weight", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+        setLatestWeight(weightData);
 
-      if (!error && data) {
-        setMetrics(data);
+        const { data: sleepData } = await supabase
+          .from("metrics")
+          .select("*")
+          .eq("user_id", user.id)
+          .not("sleep_hours", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+        setLatestSleepHours(sleepData);
+
+        const { data: bpData } = await supabase
+          .from("metrics")
+          .select("*")
+          .eq("user_id", user.id)
+          .not("blood_pressure", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+        setLatestBloodPressure(bpData);
+      } catch (error) {
+        console.error("Error fetching latest metrics:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    getMetrics();
+    getLatestMetrics();
   }, [user]);
-
-  const weights = metrics
-    ?.map((metric) => metric.weight)
-    .filter(Boolean) as number[];
-  const latestWeight = weights && weights.length > 0 ? weights[0] : null;
 
   if (loading) {
     return <Loading />;
@@ -71,45 +94,40 @@ export default function DashboardScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.summarySection}>
+          <Text style={styles.sectionTitle}>Health Summary</Text>
+          <View style={styles.summaryCards}>
+            <View style={styles.summaryCard}>
+              <IconSymbol name="scalemass" style={styles.summaryIcon} size={30} color={"#da2978"} />
+              <Text style={styles.summaryLabel}>Weight</Text>
+              <Text style={styles.summaryValue}>
+                {latestWeight ? `${latestWeight.weight} kg` : "N/A"}
+              </Text>
+            </View>
+            <View style={styles.summaryCard}>
+              <IconSymbol name="bed.double" style={styles.summaryIcon} size={30} color={"#da2978"} />
+              <Text style={styles.summaryLabel}>Last Sleep</Text>
+              <Text style={styles.summaryValue}>
+                {latestSleepHours ? `${latestSleepHours.sleep_hours} h` : "N/A"}
+              </Text>
+            </View>
+            <View style={styles.summaryCard}>
+              <IconSymbol name="heart" style={styles.summaryIcon} size={30} color={"#da2978"} />
+              <Text style={styles.summaryLabel}>Blood Pressure</Text>
+              <Text style={styles.summaryValue}>
+                {latestBloodPressure
+                  ? latestBloodPressure.blood_pressure
+                  : "N/A"}
+              </Text>
+            </View>
+          </View>
+        </View>
         <View style={styles.card}>
           <Text style={styles.motivation}>{randomMessage}</Text>
-          {latestWeight && (
-            <Text style={styles.latestWeight}>
-              Great job with your current weight of {latestWeight} kg! Keep it
-              up.
-            </Text>
-          )}
-
           <PrimaryButton
             title="Define Your Goals"
-            onPress={() => router.push("/goals")}
+            onPress={() => router.push("/(tabs)/goals")}
           />
-        </View>
-
-        <View style={styles.metricsSection}>
-          <Text style={styles.sectionTitle}>Last Metrics</Text>
-          {metrics && metrics.length > 0 ? (
-            metrics.map((metric) => (
-              <View key={metric.id} style={styles.metricCard}>
-                <Text style={styles.metricDate}>
-                  {new Date(metric.created_at).toLocaleDateString()}
-                </Text>
-                <View style={styles.metricValues}>
-                  {metric.weight && <Text>Weight: {metric.weight} kg</Text>}
-                  {metric.blood_pressure && (
-                    <Text>BP: {metric.blood_pressure}</Text>
-                  )}
-                  {metric.sleep_hours && (
-                    <Text>Sleep: {metric.sleep_hours}h</Text>
-                  )}
-                </View>
-              </View>
-            ))
-          ) : (
-            <Text style={styles.noMetrics}>
-              You haven&apos;t logged any metrics yet.
-            </Text>
-          )}
         </View>
       </ScrollView>
     </View>
@@ -119,62 +137,67 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   scrollContent: {
     padding: 16,
-    gap: 16,
+    gap: 24,
   },
   card: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 16,
+    padding: 24,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   motivation: {
     fontSize: 24,
     textAlign: "center",
     fontWeight: "600",
-    marginBottom: 16,
+    marginBottom: 36,
     color: "#da2978",
   },
-  latestWeight: {
-    fontSize: 14,
-    textAlign: "center",
-    color: "#555",
-    marginBottom: 12,
-  },
-  metricsSection: {
+  summarySection: {
     marginTop: 12,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
-    marginBottom: 12,
+    marginBottom: 16,
+    color: "#333",
   },
-  metricCard: {
-    backgroundColor: "#fafafa",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
+  summaryCards: {
     flexDirection: "row",
     justifyContent: "space-between",
+    gap: 16,
+  },
+  summaryCard: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
     alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  metricDate: {
-    fontSize: 12,
-    color: "#777",
+  summaryIcon: {
+    marginBottom: 12,
+    color: "#da2978",
   },
-  metricValues: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  noMetrics: {
+  summaryLabel: {
+    fontSize: 14,
+    color: "#555",
+    fontWeight: "600",
     textAlign: "center",
-    color: "#777",
-    paddingVertical: 16,
+    marginBottom: 4,
+  },
+  summaryValue: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#333",
   },
 });

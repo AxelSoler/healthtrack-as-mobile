@@ -20,6 +20,9 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  "scalemass": "fitness-center",
+  "bed.double": "hotel",
+  "heart": "favorite",
 } as IconMapping;
 
 /**
